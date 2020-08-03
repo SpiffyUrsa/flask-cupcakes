@@ -80,6 +80,8 @@ class CupcakeViewsTestCase(TestCase):
             })
 
     def test_get_cupcake(self):
+        """Tests the get cupcake route."""
+
         with app.test_client() as client:
             url = f"/api/cupcakes/{self.cupcake.id}"
             resp = client.get(url)
@@ -97,6 +99,8 @@ class CupcakeViewsTestCase(TestCase):
             })
 
     def test_create_cupcake(self):
+        """Tests the create cupcake route."""
+
         with app.test_client() as client:
             url = "/api/cupcakes"
             resp = client.post(url, json=CUPCAKE_DATA_2)
@@ -122,6 +126,8 @@ class CupcakeViewsTestCase(TestCase):
 
 
     def test_create_cupcake_with_no_image(self):
+        """Test the create cupcake route when no image is passed through."""
+
         with app.test_client() as client:
             url = "/api/cupcakes"
             resp = client.post(url, json=CUPCAKE_DATA_4)
@@ -145,6 +151,8 @@ class CupcakeViewsTestCase(TestCase):
 
 
     def test_update_cupcake(self):
+        """Test update cupcake route."""
+
         with app.test_client() as client:
             url = f"/api/cupcakes/{self.cupcake.id}"
             resp = client.patch(url, json=CUPCAKE_DATA_3)
@@ -163,13 +171,33 @@ class CupcakeViewsTestCase(TestCase):
                 }
             })
 
+    def test_update_cupcake_not_found(self):
+        """Test update cupcake route if cupcake does not exist."""
+        with app.test_client() as client:
+            url = "/api/cupcakes/a"
+            resp = client.patch(url, json=CUPCAKE_DATA_3)
+
+            self.assertEqual(resp.status_code, 404)
+
 
     def test_delete_cupcake(self):
+        """Test delete cupcake route."""
+
         with app.test_client() as client:
             url = f"/api/cupcakes/{self.cupcake.id}"
             resp = client.delete(url)
 
             self.assertEqual(resp.status_code, 200)
             self.assertEqual(resp.json, {"message": "Deleted"})
+
+    def test_delete_cupcake_not_found(self):
+        """Test delete cupcake if the cupcake does not exist."""
+
+        with app.test_client() as client:
+            url = "/api/cupcakes/a"
+            resp = client.delete(url)
+
+            self.assertEqual(resp.status_code, 404)
+            #TODO: How to test what the 404 will return?
 
             

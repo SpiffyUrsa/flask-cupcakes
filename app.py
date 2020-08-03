@@ -18,8 +18,16 @@ app.config['SECRET_KEY'] = "I'LL NEVER TELL!!"
 
 # debug = DebugToolbarExtension(app)
 
+@app.route("/")
+def index():
+    """Show index page."""
+    cupcakes = Cupcake.query.all()
+
+    return render_template("index.html",cupcakes=cupcakes)
+
 @app.route("/api/cupcakes")
 def list_all_cupcakes():
+    """Lists all cupcakes."""
 
     cupcakes = Cupcake.query.all()
     serialized = [cupcake.serialize() for cupcake in cupcakes]
@@ -29,6 +37,7 @@ def list_all_cupcakes():
 
 @app.route("/api/cupcakes/<int:cupcake_id>")
 def list_single_cupcake(cupcake_id):
+    """Lists a single cupcake."""
 
     cupcake = Cupcake.query.get_or_404(cupcake_id)
     serialized = cupcake.serialize()
@@ -37,6 +46,7 @@ def list_single_cupcake(cupcake_id):
 
 @app.route("/api/cupcakes", methods=['POST'])
 def create_cupcake():
+    """Create a cupcake."""
 
     flavor = request.json["flavor"]
     size = request.json["size"]
@@ -55,33 +65,15 @@ def create_cupcake():
 
 @app.route('/api/cupcakes/<int:cupcake_id>', methods=['PATCH'])
 def update_cupcake(cupcake_id):
+    """Update a cupcake."""
 
     cupcake = Cupcake.query.get_or_404(cupcake_id)
     
-    flavor = cupcake.flavor
-    size = cupcake.size
-    rating = cupcake.rating
-    image = cupcake.image
-
-    #turn this into a loop :)
-
-    try:
-        cupcake.flavor = request.json["flavor"]
-    except KeyError:
-        cupcake.flavor = flavor
-    try:
-        cupcake.size = request.json["size"]
-    except KeyError:
-        cupcake.size = size
-    try:
-        cupcake.rating = request.json["rating"]
-    except KeyError:
-        cupcake.rating = rating
-    try:
-        cupcake.image = request.json["image"]
-    except KeyError:
-        cupcake.image = image
-
+    cupcake.flavor = request.json.get("flavor") or cupcake.flavor
+    cupcake.size = request.json.get("size") or cupcake.size
+    cupcake.rating = request.json.get("rating") or cupcake.rating
+    cupcake.image = request.json.get("image") or cupcake.image
+  
     db.session.commit()
 
     serialized = cupcake.serialize()
@@ -91,6 +83,7 @@ def update_cupcake(cupcake_id):
 
 @app.route('/api/cupcakes/<int:cupcake_id>', methods=['DELETE'])
 def delete_cupcake(cupcake_id):
+    """Delete a cupcake."""
 
     cupcake = Cupcake.query.get_or_404(cupcake_id)
 
@@ -98,5 +91,7 @@ def delete_cupcake(cupcake_id):
     db.session.commit()
 
     return (jsonify(message='Deleted'), 200)
+
+    # 
  
 
