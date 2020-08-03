@@ -2,7 +2,7 @@
 
 
 from flask import Flask, request, redirect, render_template, flash, jsonify
-from flask_debugtoolbar import DebugToolbarExtension
+# from flask_debugtoolbar import DebugToolbarExtension
 
 from models import db, connect_db, Cupcake
 
@@ -16,7 +16,7 @@ db.create_all()
 
 app.config['SECRET_KEY'] = "I'LL NEVER TELL!!"
 
-debug = DebugToolbarExtension(app)
+# debug = DebugToolbarExtension(app)
 
 @app.route("/api/cupcakes")
 def list_all_cupcakes():
@@ -24,7 +24,6 @@ def list_all_cupcakes():
     cupcakes = Cupcake.query.all()
     serialized = [cupcake.serialize() for cupcake in cupcakes]
     # For each instance of cupcake, we serialize(turn into a dict) each instance of cupcake. 
-    # TODO: Ask why we pass cupcake in to the serialize method up here and not in the single method
 
     return jsonify(cupcakes=serialized)
 
@@ -42,7 +41,7 @@ def create_cupcake():
     flavor = request.json["flavor"]
     size = request.json["size"]
     rating = request.json["rating"]
-    image = request.json["image"]
+    image = request.json["image"] or None
 
     new_cupcake = Cupcake(flavor=flavor, size=size, rating=rating, image=image)
 
@@ -54,7 +53,50 @@ def create_cupcake():
     return (jsonify(cupcake=serialized), 201)
 
 
+@app.route('/api/cupcakes/<int:cupcake_id>', methods=['PATCH'])
+def update_cupcake(cupcake_id):
 
-
+    cupcake = Cupcake.query.get_or_404(cupcake_id)
     
+    flavor = cupcake.flavor
+    size = cupcake.size
+    rating = cupcake.rating
+    image = cupcake.image
+
+    #turn this into a loop :)
+
+    try:
+        cupcake.flavor = request.json["flavor"]
+    except KeyError:
+        cupcake.flavor = flavor
+    try:
+        cupcake.size = request.json["size"]
+    except KeyError:
+        cupcake.size = size
+    try:
+        cupcake.rating = request.json["rating"]
+    except KeyError:
+        cupcake.rating = rating
+    try:
+        cupcake.image = request.json["image"]
+    except KeyError:
+        cupcake.image = image
+
+    db.session.commit()
+
+    serialized = cupcake.serialize()
+
+    return (jsonify(cupcake=serialized), 200)
+
+
+@app.route('/api/cupcakes/<int:cupcake_id>', methods=['DELETE'])
+def delete_cupcake(cupcake_id):
+
+    cupcake = Cupcake.query.get_or_404(cupcake_id)
+
+    db.session.delete(cupcake)
+    db.session.commit()
+
+    return (jsonify(message='Deleted'), 200)
+ 
 
