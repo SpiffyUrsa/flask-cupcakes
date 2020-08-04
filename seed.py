@@ -19,3 +19,6 @@ c2 = Cupcake(
 
 db.session.add_all([c1, c2])
 db.session.commit()
+
+
+# testing!
